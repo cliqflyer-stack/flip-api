@@ -128,6 +128,19 @@ export const deals = pgTable('deals', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  name: text('name').notNull(),
+  role: text('role').notNull().default('user'), // 'admin' | 'user'
+  phone: text('phone'),
+  avatarUrl: text('avatar_url'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // Relations
 export const storeLocationsRelations = relations(storeLocations, ({ one, many }) => ({
   merchant: one(merchants, {

@@ -13,6 +13,7 @@ import { productRoutes } from './routes/products.js';
 import { dealRoutes } from './routes/deals.js';
 import { statsRoutes } from './routes/stats.js';
 import { uploadRoutes } from './routes/upload.js';
+import { authRoutes } from './routes/auth.js';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ async function start() {
   await fastify.register(dealRoutes);
   await fastify.register(statsRoutes);
   await fastify.register(uploadRoutes);
+  await fastify.register(authRoutes);
 
   // Root route
   fastify.get('/', async (_req, reply) => {
@@ -65,6 +67,7 @@ async function start() {
       status: 'active',
       endpoints: {
         health: '/health',
+        auth: '/api/v1/auth',
         merchants: '/api/v1/merchants',
         flyers: '/api/v1/flyers',
         products: '/api/v1/products',
