@@ -6,15 +6,15 @@ import { z } from 'zod';
 
 const productSchema = z.object({
   id: z.string().optional(),
-  merchantId: z.string().optional(),
+  merchantId: z.string().optional().nullable(),
   name: z.string().min(1),
   brand: z.string().default(''),
   description: z.string().default(''),
-  regularPrice: z.string().or(z.number().transform((n) => n.toString())),
-  offerPrice: z.string().or(z.number().transform((n) => n.toString())),
+  regularPrice: z.union([z.string(), z.number()]).transform((n) => String(n)),
+  offerPrice: z.union([z.string(), z.number()]).transform((n) => String(n)),
   unit: z.string().default('each'),
   category: z.string().default('General'),
-  sku: z.string().optional(),
+  sku: z.string().optional().nullable(),
   imageUrl: z.string().min(1),
 });
 

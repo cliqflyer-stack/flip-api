@@ -24,10 +24,22 @@ const storeLocationSchema = z.object({
   address: z.string().min(1),
   city: z.string().min(1),
   province: z.string().default('ON'),
-  postalCode: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  phone: z.string().optional(),
+  postalCode: z.string().optional().nullable(),
+  latitude: z
+    .union([
+      z.number(),
+      z.string().transform((v) => (v === '' || isNaN(Number(v)) ? undefined : Number(v))),
+    ])
+    .optional()
+    .nullable(),
+  longitude: z
+    .union([
+      z.number(),
+      z.string().transform((v) => (v === '' || isNaN(Number(v)) ? undefined : Number(v))),
+    ])
+    .optional()
+    .nullable(),
+  phone: z.string().optional().nullable(),
 });
 
 export async function merchantRoutes(fastify: FastifyInstance) {
