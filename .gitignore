@@ -2,6 +2,8 @@ node_modules/
 dist/
 uploads/*
 !uploads/.gitkeep
+!uploads/flyers/
+!uploads/products/
 .env
 .env.local
 .env.*.local
