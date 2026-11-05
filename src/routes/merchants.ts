@@ -40,6 +40,7 @@ const storeLocationSchema = z.object({
     .optional()
     .nullable(),
   phone: z.string().optional().nullable(),
+  logoUrl: z.string().optional().nullable(),
 });
 
 export async function merchantRoutes(fastify: FastifyInstance) {

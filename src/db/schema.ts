@@ -45,6 +45,7 @@ export const storeLocations = pgTable('store_locations', {
   latitude: doublePrecision('latitude'),
   longitude: doublePrecision('longitude'),
   phone: text('phone'),
+  logoUrl: text('logo_url'),
 });
 
 export const flyers = pgTable('flyers', {
