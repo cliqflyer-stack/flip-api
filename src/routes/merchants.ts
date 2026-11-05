@@ -17,6 +17,19 @@ const merchantSchema = z.object({
   website: z.string().optional(),
 });
 
+const storeLocationSchema = z.object({
+  id: z.string().optional(),
+  merchantId: z.string().min(1),
+  name: z.string().min(1),
+  address: z.string().min(1),
+  city: z.string().min(1),
+  province: z.string().default('ON'),
+  postalCode: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  phone: z.string().optional(),
+});
+
 export async function merchantRoutes(fastify: FastifyInstance) {
   // List all merchants
   fastify.get('/api/v1/merchants', async (_req, reply) => {
@@ -82,6 +95,64 @@ export async function merchantRoutes(fastify: FastifyInstance) {
 
     if (!deleted) {
       return reply.status(404).send({ error: 'Merchant not found' });
+    }
+    return reply.send({ success: true, deletedId: deleted.id });
+  });
+
+  // --- STORE LOCATIONS (Franchise Branches) ---
+
+  // List store locations (supports ?merchantId=...)
+  fastify.get<{ Querystring: { merchantId?: string } }>(
+    '/api/v1/store-locations',
+    async (req, reply) => {
+      const { merchantId } = req.query;
+      const conditions = merchantId ? eq(storeLocations.merchantId, merchantId) : undefined;
+      const list = await db.query.storeLocations.findMany({
+        where: conditions,
+        with: {
+          merchant: true,
+          flyers: true,
+        },
+      });
+      return reply.send(list);
+    }
+  );
+
+  // Create store location
+  fastify.post('/api/v1/store-locations', async (req, reply) => {
+    const parsed = storeLocationSchema.parse(req.body);
+    const id = parsed.id || `loc_${Date.now().toString(36)}`;
+    const [inserted] = await db
+      .insert(storeLocations)
+      .values({ ...parsed, id })
+      .returning();
+    return reply.status(201).send(inserted);
+  });
+
+  // Update store location
+  fastify.put<{ Params: { id: string } }>('/api/v1/store-locations/:id', async (req, reply) => {
+    const parsed = storeLocationSchema.partial().parse(req.body);
+    const [updated] = await db
+      .update(storeLocations)
+      .set(parsed)
+      .where(eq(storeLocations.id, req.params.id))
+      .returning();
+
+    if (!updated) {
+      return reply.status(404).send({ error: 'Store location not found' });
+    }
+    return reply.send(updated);
+  });
+
+  // Delete store location
+  fastify.delete<{ Params: { id: string } }>('/api/v1/store-locations/:id', async (req, reply) => {
+    const [deleted] = await db
+      .delete(storeLocations)
+      .where(eq(storeLocations.id, req.params.id))
+      .returning();
+
+    if (!deleted) {
+      return reply.status(404).send({ error: 'Store location not found' });
     }
     return reply.send({ success: true, deletedId: deleted.id });
   });

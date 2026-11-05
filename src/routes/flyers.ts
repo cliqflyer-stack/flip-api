@@ -7,6 +7,7 @@ import { z } from 'zod';
 const flyerSchema = z.object({
   id: z.string().optional(),
   merchantId: z.string().min(1),
+  storeLocationId: z.string().optional().nullable(),
   title: z.string().min(1),
   subtitle: z.string().optional(),
   badgeText: z.string().default('NEW'),
@@ -37,10 +38,10 @@ const batchHotspotsSchema = z.object({
 
 export async function flyerRoutes(fastify: FastifyInstance) {
   // List all flyers
-  fastify.get<{ Querystring: { status?: string; merchantId?: string } }>(
+  fastify.get<{ Querystring: { status?: string; merchantId?: string; storeLocationId?: string } }>(
     '/api/v1/flyers',
     async (req, reply) => {
-      const { status, merchantId } = req.query;
+      const { status, merchantId, storeLocationId } = req.query;
       const conditions = [];
 
       if (status) {
@@ -49,11 +50,15 @@ export async function flyerRoutes(fastify: FastifyInstance) {
       if (merchantId) {
         conditions.push(eq(flyers.merchantId, merchantId));
       }
+      if (storeLocationId) {
+        conditions.push(eq(flyers.storeLocationId, storeLocationId));
+      }
 
       const list = await db.query.flyers.findMany({
         where: conditions.length > 0 ? and(...conditions) : undefined,
         with: {
           merchant: true,
+          storeLocation: true,
           pages: true,
           hotspots: {
             with: {
@@ -73,6 +78,7 @@ export async function flyerRoutes(fastify: FastifyInstance) {
       where: eq(flyers.id, req.params.id),
       with: {
         merchant: true,
+        storeLocation: true,
         pages: {
           orderBy: [flyerPages.pageNumber],
         },

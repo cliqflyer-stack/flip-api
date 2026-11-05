@@ -52,6 +52,7 @@ export const flyers = pgTable('flyers', {
   merchantId: text('merchant_id')
     .notNull()
     .references(() => merchants.id, { onDelete: 'cascade' }),
+  storeLocationId: text('store_location_id').references(() => storeLocations.id, { onDelete: 'set null' }),
   title: text('title').notNull(),
   subtitle: text('subtitle'),
   badgeText: text('badge_text').default('NEW'),
@@ -128,6 +129,14 @@ export const deals = pgTable('deals', {
 });
 
 // Relations
+export const storeLocationsRelations = relations(storeLocations, ({ one, many }) => ({
+  merchant: one(merchants, {
+    fields: [storeLocations.merchantId],
+    references: [merchants.id],
+  }),
+  flyers: many(flyers),
+}));
+
 export const merchantsRelations = relations(merchants, ({ many, one }) => ({
   locations: many(storeLocations),
   flyers: many(flyers),
@@ -143,6 +152,10 @@ export const flyersRelations = relations(flyers, ({ one, many }) => ({
   merchant: one(merchants, {
     fields: [flyers.merchantId],
     references: [merchants.id],
+  }),
+  storeLocation: one(storeLocations, {
+    fields: [flyers.storeLocationId],
+    references: [storeLocations.id],
   }),
   pages: many(flyerPages),
   hotspots: many(hotspots),
